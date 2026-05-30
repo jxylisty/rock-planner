@@ -1061,3 +1061,21 @@ input[type="number"] {
   font-size: 14px;
   color: var(--text-secondary);
 }
+
+/* 版权声明样式 */
+.loading-copyright {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 10px;
+  color: var(--text-muted);
+  opacity: 0.5;
+}
+
+.copyright-footer {
+  margin-top: 32px;
+  padding: 16px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  opacity: 0.5;
+}
