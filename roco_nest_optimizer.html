@@ -1,0 +1,1036 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>洛克王国：世界 家园精灵小窝规划器</title>
+  <style>
+    :root {
+      --bg: #f6f1e8;
+      --panel: rgba(255, 251, 244, 0.92);
+      --panel-strong: #fffaf0;
+      --ink: #20333d;
+      --muted: #68757c;
+      --line: rgba(32, 51, 61, 0.12);
+      --accent: #db5f51;
+      --accent-2: #3d8da6;
+      --accent-3: #f2b84b;
+      --male: #6fb5c6;
+      --female: #ef9486;
+      --pair: rgba(240, 154, 88, 0.35);
+      --good: #2f8b57;
+      --shadow: 0 18px 48px rgba(80, 63, 33, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(255, 205, 148, 0.52), transparent 32%),
+        radial-gradient(circle at top right, rgba(107, 181, 198, 0.35), transparent 28%),
+        linear-gradient(180deg, #fbf7ef 0%, #f2ead7 100%);
+    }
+
+    .shell {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 28px 20px 36px;
+    }
+
+    .hero {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 5vw, 46px);
+      line-height: 1.08;
+      letter-spacing: 0.02em;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 900px;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    .hero-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .hero-links a {
+      display: inline-flex;
+      align-items: center;
+      padding: 10px 14px;
+      border-radius: 999px;
+      text-decoration: none;
+      color: var(--ink);
+      background: rgba(255, 250, 240, 0.88);
+      border: 1px solid var(--line);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.75);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .controls {
+      padding: 22px;
+      position: sticky;
+      top: 16px;
+    }
+
+    .section-title {
+      margin: 0 0 14px;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field label,
+    .hint strong {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .field input,
+    .field select,
+    button {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 13px 14px;
+      font: inherit;
+      color: var(--ink);
+      background: var(--panel-strong);
+    }
+
+    .field input:focus,
+    .field select:focus,
+    button:focus {
+      outline: 2px solid rgba(219, 95, 81, 0.18);
+      border-color: rgba(219, 95, 81, 0.4);
+    }
+
+    button {
+      cursor: pointer;
+      background: linear-gradient(135deg, #e37056 0%, #cd4f5f 100%);
+      color: #fff;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      border: none;
+      box-shadow: 0 14px 24px rgba(205, 79, 95, 0.24);
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    .hint,
+    .legend,
+    .assumptions {
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(255, 250, 240, 0.86);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      flex: 0 0 auto;
+    }
+
+    .results {
+      padding: 22px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .stat {
+      padding: 16px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.78), rgba(248,239,222,0.72));
+      border: 1px solid var(--line);
+    }
+
+    .stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 6px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .stat strong {
+      font-size: 30px;
+      line-height: 1;
+    }
+
+    .canvas-card {
+      padding: 12px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, #fffaf1 0%, #f7efdf 100%);
+      border: 1px solid rgba(72, 56, 30, 0.08);
+      overflow: auto;
+    }
+
+    svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      min-height: 420px;
+    }
+
+    .lists {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 16px;
+    }
+
+    .table-wrap,
+    .pair-wrap {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.68);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(32, 51, 61, 0.08);
+      vertical-align: top;
+    }
+
+    th {
+      background: rgba(250, 244, 231, 0.9);
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .pair-list {
+      display: grid;
+      gap: 10px;
+      max-height: 480px;
+      overflow: auto;
+      padding: 14px;
+    }
+
+    .pair-chip {
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(255, 250, 240, 0.82);
+      border: 1px solid rgba(32, 51, 61, 0.08);
+      line-height: 1.5;
+      font-size: 13px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-right: 8px;
+      color: #fff;
+    }
+
+    .badge.female { background: var(--female); }
+    .badge.male { background: var(--male); }
+
+    .notice {
+      color: var(--good);
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .error {
+      color: #b42318;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    @media (max-width: 1080px) {
+      .layout,
+      .lists {
+        grid-template-columns: 1fr;
+      }
+
+      .controls {
+        position: static;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="hero">
+      <h1>洛克王国：世界 家园精灵小窝规划器</h1>
+      <p>输入雄性、雌性和总小窝数量后，页面会自动补全一个字段，并在“2×2 小窝不重叠、中心曼哈顿距离 ≤ 5、仅同蛋组可交配、子代种类跟随母本”的前提下，给出一张优先最大化可孵化配对数、其次最大化母本异色种类数的摆放图。</p>
+      <div class="hero-links">
+        <a href="./roco_nest_optimizer.html">理论摆窝页</a>
+        <a href="./roco_shiny_breeding_planner.html">库存补图鉴页</a>
+      </div>
+    </section>
+
+    <div class="layout">
+      <aside class="panel controls">
+        <div class="grid">
+          <div>
+            <p class="section-title">输入参数</p>
+            <div class="grid">
+              <div class="field">
+                <label for="maleCount">雄性数量</label>
+                <input id="maleCount" type="number" min="0" max="20" value="4">
+              </div>
+              <div class="field">
+                <label for="femaleCount">雌性数量</label>
+                <input id="femaleCount" type="number" min="0" max="20" value="4">
+              </div>
+              <div class="field">
+                <label for="nestCount">小窝总数</label>
+                <input id="nestCount" type="number" min="1" max="20" value="8">
+              </div>
+              <div class="field">
+                <label for="autoField">自动补全字段</label>
+                <select id="autoField">
+                  <option value="female">自动算雌性 = 小窝 - 雄性</option>
+                  <option value="male">自动算雄性 = 小窝 - 雌性</option>
+                  <option value="nest">自动算小窝 = 雄性 + 雌性</option>
+                </select>
+              </div>
+              <button id="solveButton" type="button">计算最优摆放</button>
+            </div>
+          </div>
+
+          <div class="hint">
+            <strong>优化顺序</strong><br>
+            1. 先最大化满足距离与蛋组条件的公母可孵化配对数。<br>
+            2. 在配对数相同的前提下，再最大化可稳定产出的母本异色种类数。
+          </div>
+
+          <div class="legend">
+            <div class="legend-row"><span class="swatch" style="background: var(--female)"></span> 雌性小窝，子代种类跟随这里</div>
+            <div class="legend-row"><span class="swatch" style="background: var(--male)"></span> 雄性小窝，用来提供蛋组兼容</div>
+            <div class="legend-row"><span class="swatch" style="background: var(--pair)"></span> 可交配连线，表示中心曼哈顿距离 ≤ 5 且蛋组兼容</div>
+          </div>
+
+          <div class="assumptions">
+            当前默认假设：每个候选种类都可重复使用；只按你给出的蛋组数据判断兼容性；“异色种类数”按<strong>有至少一个可交配对象的雌性种类数</strong>统计，因为子代会继承母本种类。
+          </div>
+
+          <div class="assumptions">
+            这个问题通常<strong>不是唯一解</strong>。只要整体连边结构等价，或者在不降低配对数与母本种类数的前提下交换同类位置、镜像翻转、替换成同蛋组桥接精灵，都可能得到另一组同分最优摆法。
+          </div>
+        </div>
+      </aside>
+
+      <main class="panel results">
+        <div id="status" class="notice">等待计算。</div>
+
+        <section class="stats" id="stats"></section>
+
+        <section class="canvas-card">
+          <svg id="board" viewBox="0 0 900 540" aria-label="最优小窝摆放图"></svg>
+        </section>
+
+        <section class="lists">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>编号</th>
+                  <th>性别</th>
+                  <th>精灵</th>
+                  <th>蛋组</th>
+                  <th>坐标</th>
+                </tr>
+              </thead>
+              <tbody id="nestTableBody"></tbody>
+            </table>
+          </div>
+
+          <div class="pair-wrap">
+            <div id="pairList" class="pair-list"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const SPECIES = [
+      { name: "粉星仔", aliases: ["粉耳星兔", "落陨星兔"], groups: ["妖精"] },
+      { name: "粉粉星", aliases: ["小皮球"], groups: ["妖精"] },
+      { name: "酷拉", aliases: ["拉特"], groups: ["妖精"] },
+      { name: "雪影娃娃", aliases: ["大耳帽兜"], groups: ["妖精", "拟人"] },
+      { name: "治愈兔", aliases: ["红绒十字"], groups: ["妖精", "动物"] },
+      { name: "格兰球", aliases: [], groups: ["妖精", "植物"] },
+      { name: "月牙雪熊", aliases: [], groups: ["动物", "怪兽"] },
+      { name: "恶魔狼", aliases: [], groups: ["动物"] },
+      { name: "獠牙猪", aliases: ["呼呼猪"], groups: ["动物"] },
+      { name: "奇丽花", aliases: [], groups: ["植物"] },
+      { name: "燃薪虫", aliases: ["柴渣虫"], groups: ["植物", "昆虫"] },
+      { name: "窃光蚊", aliases: ["嗜光嗡嗡"], groups: ["昆虫"] },
+      { name: "空空颅", aliases: ["夜宿颅", "夜枭"], groups: ["怪兽"] },
+      { name: "机械方方", aliases: [], groups: ["机械", "拟人"] },
+      { name: "贝瑟", aliases: ["贝古斯", "贝加尔"], groups: ["机械"] },
+      { name: "利灯鱼", aliases: ["双灯鱼"], groups: ["海洋"] }
+    ];
+
+    const GROUP_ORDER = ["妖精", "动物", "植物", "昆虫", "怪兽", "机械", "拟人", "海洋"];
+    const GROUP_MASK = Object.fromEntries(GROUP_ORDER.map((name, index) => [name, 1 << index]));
+    const SPECIES_BY_INDEX = SPECIES.map((species, index) => ({
+      ...species,
+      index,
+      mask: species.groups.reduce((sum, group) => sum | GROUP_MASK[group], 0),
+      label: species.aliases.length ? `${species.name}（${species.aliases.join(" / ")}）` : species.name
+    }));
+    const ALL_SPECIES_MASK = (1 << SPECIES_BY_INDEX.length) - 1;
+    const SPECIES_COMPATIBILITY = SPECIES_BY_INDEX.map(species =>
+      SPECIES_BY_INDEX.reduce((mask, other) => (
+        (species.mask & other.mask) !== 0 ? (mask | (1 << other.index)) : mask
+      ), 0)
+    );
+
+    const maleInput = document.getElementById("maleCount");
+    const femaleInput = document.getElementById("femaleCount");
+    const nestInput = document.getElementById("nestCount");
+    const autoFieldInput = document.getElementById("autoField");
+    const solveButton = document.getElementById("solveButton");
+    const statusEl = document.getElementById("status");
+    const statsEl = document.getElementById("stats");
+    const boardEl = document.getElementById("board");
+    const nestTableBody = document.getElementById("nestTableBody");
+    const pairList = document.getElementById("pairList");
+
+    function popcount(value) {
+      let count = 0;
+      let current = value >>> 0;
+      while (current) {
+        current &= current - 1;
+        count++;
+      }
+      return count;
+    }
+
+    function normalizeCells(cells) {
+      const minX = Math.min(...cells.map(cell => cell.x));
+      const minY = Math.min(...cells.map(cell => cell.y));
+      return cells
+        .map(cell => ({ x: cell.x - minX, y: cell.y - minY }))
+        .sort((a, b) => a.y - b.y || a.x - b.x);
+    }
+
+    function serializeCells(cells) {
+      return cells.map(cell => `${cell.x},${cell.y}`).join(";");
+    }
+
+    function scoreShape(cells) {
+      let pairScore = 0;
+      for (let i = 0; i < cells.length; i++) {
+        for (let j = i + 1; j < cells.length; j++) {
+          const distance = Math.abs(cells[i].x - cells[j].x) + Math.abs(cells[i].y - cells[j].y);
+          if (distance <= 2) {
+            pairScore++;
+          }
+        }
+      }
+      const width = Math.max(...cells.map(cell => cell.x)) + 1;
+      const height = Math.max(...cells.map(cell => cell.y)) + 1;
+      return { pairScore, compactness: -(width * height), width, height };
+    }
+
+    function expandShape(cells) {
+      const occupied = new Set(cells.map(cell => `${cell.x},${cell.y}`));
+      const next = [];
+      const seen = new Set();
+      for (const cell of cells) {
+        const neighbors = [
+          { x: cell.x + 1, y: cell.y },
+          { x: cell.x - 1, y: cell.y },
+          { x: cell.x, y: cell.y + 1 },
+          { x: cell.x, y: cell.y - 1 }
+        ];
+        for (const neighbor of neighbors) {
+          const key = `${neighbor.x},${neighbor.y}`;
+          if (occupied.has(key) || seen.has(key)) {
+            continue;
+          }
+          seen.add(key);
+          next.push(neighbor);
+        }
+      }
+      return next;
+    }
+
+    function generateLayout(n) {
+      if (n <= 0) {
+        return [];
+      }
+      const beamWidth = n <= 12 ? 1200 : 700;
+      let states = [{ cells: [{ x: 0, y: 0 }] }];
+
+      for (let size = 1; size < n; size++) {
+        const candidates = new Map();
+        for (const state of states) {
+          for (const addition of expandShape(state.cells)) {
+            const nextCells = normalizeCells([...state.cells, addition]);
+            const key = serializeCells(nextCells);
+            if (candidates.has(key)) {
+              continue;
+            }
+            const score = scoreShape(nextCells);
+            candidates.set(key, { cells: nextCells, score });
+          }
+        }
+
+        states = [...candidates.values()]
+          .sort((a, b) => (
+            b.score.pairScore - a.score.pairScore ||
+            b.score.compactness - a.score.compactness ||
+            a.score.height - b.score.height
+          ))
+          .slice(0, beamWidth);
+      }
+
+      return states[0].cells;
+    }
+
+    function buildEdges(cells) {
+      const edges = [];
+      const adjacency = Array.from({ length: cells.length }, () => []);
+      for (let i = 0; i < cells.length; i++) {
+        for (let j = i + 1; j < cells.length; j++) {
+          const distance = Math.abs(cells[i].x - cells[j].x) + Math.abs(cells[i].y - cells[j].y);
+          if (distance <= 2) {
+            edges.push([i, j]);
+            adjacency[i].push(j);
+            adjacency[j].push(i);
+          }
+        }
+      }
+      return { edges, adjacency };
+    }
+
+    function estimateCombinationCount(n, k) {
+      const choose = Math.min(k, n - k);
+      let result = 1;
+      for (let i = 1; i <= choose; i++) {
+        result = (result * (n - choose + i)) / i;
+        if (result > 400000) {
+          return result;
+        }
+      }
+      return result;
+    }
+
+    function optimizeSexSplit(n, maleCount, edges, adjacency) {
+      const estimate = estimateCombinationCount(n, maleCount);
+      if (estimate <= 300000) {
+        let bestMask = 0;
+        let bestScore = -1;
+
+        function dfs(start, chosen, mask) {
+          if (chosen === maleCount) {
+            let cutScore = 0;
+            for (const [a, b] of edges) {
+              const isMaleA = ((mask >>> a) & 1) === 1;
+              const isMaleB = ((mask >>> b) & 1) === 1;
+              if (isMaleA !== isMaleB) {
+                cutScore++;
+              }
+            }
+            if (cutScore > bestScore) {
+              bestScore = cutScore;
+              bestMask = mask;
+            }
+            return;
+          }
+
+          for (let index = start; index <= n - (maleCount - chosen); index++) {
+            dfs(index + 1, chosen + 1, mask | (1 << index));
+          }
+        }
+
+        dfs(0, 0, 0);
+        return { maleMask: bestMask, compatibleEdgeUpperBound: bestScore };
+      }
+
+      const order = [...Array(n).keys()].sort((a, b) => adjacency[b].length - adjacency[a].length);
+      let maleSet = new Set(order.slice(0, maleCount));
+      let improved = true;
+
+      function cutScoreForSet(set) {
+        let cut = 0;
+        for (const [a, b] of edges) {
+          if (set.has(a) !== set.has(b)) {
+            cut++;
+          }
+        }
+        return cut;
+      }
+
+      while (improved) {
+        improved = false;
+        let bestSwap = null;
+        let bestScore = cutScoreForSet(maleSet);
+        const males = [...maleSet];
+        const females = [...Array(n).keys()].filter(index => !maleSet.has(index));
+        for (const male of males) {
+          for (const female of females) {
+            const next = new Set(maleSet);
+            next.delete(male);
+            next.add(female);
+            const score = cutScoreForSet(next);
+            if (score > bestScore) {
+              bestScore = score;
+              bestSwap = { male, female };
+            }
+          }
+        }
+        if (bestSwap) {
+          maleSet.delete(bestSwap.male);
+          maleSet.add(bestSwap.female);
+          improved = true;
+        }
+      }
+
+      let mask = 0;
+      for (const index of maleSet) {
+        mask |= 1 << index;
+      }
+      return { maleMask: mask, compatibleEdgeUpperBound: cutScoreForSet(maleSet) };
+    }
+
+    function optimizeSpeciesForPartition(adjacency, maleMask) {
+      const femaleIndices = [];
+      const maleIndices = [];
+      for (let i = 0; i < adjacency.length; i++) {
+        if (((maleMask >>> i) & 1) === 1) {
+          maleIndices.push(i);
+        } else {
+          femaleIndices.push(i);
+        }
+      }
+
+      const femaleOrder = [...femaleIndices].sort((a, b) => adjacency[b].length - adjacency[a].length);
+      const maleDomains = Object.fromEntries(maleIndices.map(index => [index, ALL_SPECIES_MASK]));
+      let best = null;
+
+      function backtrack(step, assignedFemales, domains, usedFemaleSpeciesMask) {
+        if (step === femaleOrder.length) {
+          const uniqueBreedingFemales = popcount(usedFemaleSpeciesMask);
+          if (!best || uniqueBreedingFemales > best.uniqueBreedingFemales) {
+            const maleSpecies = {};
+            for (const maleIndex of maleIndices) {
+              const domainMask = domains[maleIndex];
+              let chosenSpecies = SPECIES_BY_INDEX.find(species => (domainMask & (1 << species.index)) !== 0);
+              let bestBridgeScore = -1;
+              for (const species of SPECIES_BY_INDEX) {
+                if ((domainMask & (1 << species.index)) === 0) {
+                  continue;
+                }
+                const bridgeScore = adjacency[maleIndex].reduce((score, neighbor) => {
+                  const femaleSpeciesIndex = assignedFemales[neighbor];
+                  if (femaleSpeciesIndex == null) {
+                    return score;
+                  }
+                  return score + (((SPECIES_BY_INDEX[femaleSpeciesIndex].mask & species.mask) !== 0) ? 1 : 0);
+                }, 0);
+                if (bridgeScore > bestBridgeScore) {
+                  bestBridgeScore = bridgeScore;
+                  chosenSpecies = species;
+                }
+              }
+              maleSpecies[maleIndex] = chosenSpecies.index;
+            }
+
+            best = {
+              femaleSpecies: { ...assignedFemales },
+              maleSpecies,
+              uniqueBreedingFemales
+            };
+          }
+          return;
+        }
+
+        const currentUnique = popcount(usedFemaleSpeciesMask);
+        const remaining = femaleOrder.length - step;
+        if (best && currentUnique + remaining <= best.uniqueBreedingFemales) {
+          return;
+        }
+
+        const femaleIndex = femaleOrder[step];
+        const candidateSpecies = [...SPECIES_BY_INDEX].sort((a, b) => {
+          const aUsed = (usedFemaleSpeciesMask & (1 << a.index)) !== 0 ? 1 : 0;
+          const bUsed = (usedFemaleSpeciesMask & (1 << b.index)) !== 0 ? 1 : 0;
+          return aUsed - bUsed || b.groups.length - a.groups.length;
+        });
+
+        for (const species of candidateSpecies) {
+          let valid = true;
+          const nextDomains = { ...domains };
+
+          for (const neighbor of adjacency[femaleIndex]) {
+            if (((maleMask >>> neighbor) & 1) === 0) {
+              continue;
+            }
+            nextDomains[neighbor] = nextDomains[neighbor] & SPECIES_COMPATIBILITY[species.index];
+            if (nextDomains[neighbor] === 0) {
+              valid = false;
+              break;
+            }
+          }
+
+          if (!valid) {
+            continue;
+          }
+
+          const nextAssigned = { ...assignedFemales, [femaleIndex]: species.index };
+          const nextUsedMask = adjacency[femaleIndex].length > 0
+            ? (usedFemaleSpeciesMask | (1 << species.index))
+            : usedFemaleSpeciesMask;
+          backtrack(step + 1, nextAssigned, nextDomains, nextUsedMask);
+        }
+      }
+
+      backtrack(0, {}, maleDomains, 0);
+
+      if (!best) {
+        return null;
+      }
+
+      const finalAssignment = {};
+      for (const femaleIndex of femaleIndices) {
+        finalAssignment[femaleIndex] = best.femaleSpecies[femaleIndex];
+      }
+      for (const maleIndex of maleIndices) {
+        finalAssignment[maleIndex] = best.maleSpecies[maleIndex];
+      }
+      return {
+        speciesAssignment: finalAssignment,
+        uniqueBreedingFemales: best.uniqueBreedingFemales
+      };
+    }
+
+    function solvePlan(nestCount, maleCount, femaleCount) {
+      const cells = generateLayout(nestCount);
+      const { edges, adjacency } = buildEdges(cells);
+      const sexPlan = optimizeSexSplit(nestCount, maleCount, edges, adjacency);
+      const speciesPlan = optimizeSpeciesForPartition(adjacency, sexPlan.maleMask);
+      if (!speciesPlan) {
+        return null;
+      }
+
+      const nests = cells.map((cell, index) => {
+        const isMale = ((sexPlan.maleMask >>> index) & 1) === 1;
+        const species = SPECIES_BY_INDEX[speciesPlan.speciesAssignment[index]];
+        return {
+          index,
+          x: cell.x * 2,
+          y: cell.y * 2,
+          centerX: cell.x * 2 + 1,
+          centerY: cell.y * 2 + 1,
+          sex: isMale ? "雄性" : "雌性",
+          isMale,
+          species,
+          groups: species.groups.join(" / ")
+        };
+      });
+
+      const compatiblePairs = [];
+      for (const [a, b] of edges) {
+        const left = nests[a];
+        const right = nests[b];
+        if (left.isMale === right.isMale) {
+          continue;
+        }
+        if ((left.species.mask & right.species.mask) === 0) {
+          continue;
+        }
+
+        const female = left.isMale ? right : left;
+        const male = left.isMale ? left : right;
+        compatiblePairs.push({
+          a,
+          b,
+          female,
+          male,
+          distance: Math.abs(left.centerX - right.centerX) + Math.abs(left.centerY - right.centerY)
+        });
+      }
+
+      const uniqueOffspringSpecies = new Set(compatiblePairs.map(pair => pair.female.species.name));
+      return {
+        nests,
+        edges,
+        compatiblePairs,
+        femaleCount,
+        maleCount,
+        nestCount,
+        maxTheoreticalPairs: femaleCount * maleCount,
+        distanceReachablePairs: sexPlan.compatibleEdgeUpperBound,
+        uniqueOffspringSpecies: [...uniqueOffspringSpecies],
+        uniqueBreedingFemales: speciesPlan.uniqueBreedingFemales
+      };
+    }
+
+    function renderStats(result) {
+      const items = [
+        { label: "理论最大公母配对", value: result.maxTheoreticalPairs },
+        { label: "当前摆法可孵化配对", value: result.compatiblePairs.length },
+        { label: "距离层可触达上限", value: result.distanceReachablePairs },
+        { label: "可产异色母本种类", value: result.uniqueBreedingFemales }
+      ];
+      statsEl.innerHTML = items.map(item => `
+        <article class="stat">
+          <span>${item.label}</span>
+          <strong>${item.value}</strong>
+        </article>
+      `).join("");
+    }
+
+    function renderBoard(result) {
+      const margin = 46;
+      const unit = 56;
+      const nestSize = unit * 2;
+      const maxCellX = Math.max(...result.nests.map(nest => nest.x)) + 2;
+      const maxCellY = Math.max(...result.nests.map(nest => nest.y)) + 2;
+      const width = maxCellX * unit + margin * 2;
+      const height = maxCellY * unit + margin * 2;
+      const compatibleSet = new Set(result.compatiblePairs.map(pair => `${Math.min(pair.a, pair.b)}-${Math.max(pair.a, pair.b)}`));
+
+      const lines = result.compatiblePairs.map(pair => {
+        const from = result.nests[pair.a];
+        const to = result.nests[pair.b];
+        const x1 = margin + from.centerX * unit;
+        const y1 = margin + from.centerY * unit;
+        const x2 = margin + to.centerX * unit;
+        const y2 = margin + to.centerY * unit;
+        return `
+          <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"
+            stroke="rgba(240, 154, 88, 0.54)" stroke-width="10" stroke-linecap="round" />
+        `;
+      }).join("");
+
+      const tiles = result.nests.map(nest => {
+        const x = margin + nest.x * unit;
+        const y = margin + nest.y * unit;
+        const fill = nest.isMale ? "rgba(111, 181, 198, 0.92)" : "rgba(239, 148, 134, 0.92)";
+        const label = nest.species.name;
+        const groupText = nest.groups;
+        const title = `${nest.sex} ${nest.species.label}\n蛋组：${groupText}\n左上角：(${nest.x}, ${nest.y})`;
+        const compatibleCount = result.compatiblePairs.filter(pair => pair.a === nest.index || pair.b === nest.index).length;
+        return `
+          <g>
+            <title>${title}</title>
+            <rect x="${x}" y="${y}" width="${nestSize}" height="${nestSize}" rx="20" ry="20"
+              fill="${fill}" stroke="rgba(32, 51, 61, 0.18)" stroke-width="2" />
+            <text x="${x + 16}" y="${y + 34}" font-size="14" font-weight="700" fill="#ffffff">${nest.sex}</text>
+            <text x="${x + 16}" y="${y + 60}" font-size="16" font-weight="700" fill="#ffffff">${label}</text>
+            <text x="${x + 16}" y="${y + 82}" font-size="12" fill="rgba(255,255,255,0.9)">${groupText}</text>
+            <text x="${x + 16}" y="${y + 106}" font-size="12" fill="rgba(255,255,255,0.9)">可配对 ${compatibleCount}</text>
+          </g>
+        `;
+      }).join("");
+
+      const gridLines = [];
+      for (let x = 0; x <= maxCellX; x++) {
+        const px = margin + x * unit;
+        gridLines.push(`<line x1="${px}" y1="${margin}" x2="${px}" y2="${height - margin}" stroke="rgba(32,51,61,0.08)" stroke-width="1" />`);
+      }
+      for (let y = 0; y <= maxCellY; y++) {
+        const py = margin + y * unit;
+        gridLines.push(`<line x1="${margin}" y1="${py}" x2="${width - margin}" y2="${py}" stroke="rgba(32,51,61,0.08)" stroke-width="1" />`);
+      }
+
+      boardEl.setAttribute("viewBox", `0 0 ${width} ${height}`);
+      boardEl.innerHTML = `
+        <defs>
+          <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="rgba(80,63,33,0.22)" />
+          </filter>
+        </defs>
+        <rect x="0" y="0" width="${width}" height="${height}" rx="28" fill="url(#paper)" opacity="0"></rect>
+        <g>${gridLines.join("")}</g>
+        <g filter="url(#softShadow)">${lines}</g>
+        <g>${tiles}</g>
+      `;
+    }
+
+    function renderTable(result) {
+      nestTableBody.innerHTML = result.nests.map(nest => `
+        <tr>
+          <td>${nest.index + 1}</td>
+          <td><span class="badge ${nest.isMale ? "male" : "female"}">${nest.sex}</span></td>
+          <td>${nest.species.label}</td>
+          <td>${nest.groups}</td>
+          <td>(${nest.x}, ${nest.y})</td>
+        </tr>
+      `).join("");
+    }
+
+    function renderPairs(result) {
+      if (result.compatiblePairs.length === 0) {
+        pairList.innerHTML = `<div class="pair-chip">当前数量组合下，没有满足距离与蛋组兼容的公母配对。</div>`;
+        return;
+      }
+
+      pairList.innerHTML = result.compatiblePairs.map((pair, index) => `
+        <div class="pair-chip">
+          <strong>配对 ${index + 1}</strong><br>
+          母本：${pair.female.species.label}<br>
+          公本：${pair.male.species.label}<br>
+          距离：${pair.distance}，子代种类：${pair.female.species.name}
+        </div>
+      `).join("");
+    }
+
+    function syncInputs() {
+      const autoField = autoFieldInput.value;
+      const male = Number(maleInput.value) || 0;
+      const female = Number(femaleInput.value) || 0;
+      const nest = Number(nestInput.value) || 0;
+
+      if (autoField === "female") {
+        femaleInput.value = Math.max(0, nest - male);
+      } else if (autoField === "male") {
+        maleInput.value = Math.max(0, nest - female);
+      } else {
+        nestInput.value = Math.max(0, male + female);
+      }
+    }
+
+    function validateInputs() {
+      syncInputs();
+      const maleCount = Number(maleInput.value);
+      const femaleCount = Number(femaleInput.value);
+      const nestCount = Number(nestInput.value);
+
+      if (!Number.isInteger(maleCount) || !Number.isInteger(femaleCount) || !Number.isInteger(nestCount)) {
+        throw new Error("请输入整数数量。");
+      }
+      if (maleCount < 0 || femaleCount < 0 || nestCount <= 0) {
+        throw new Error("数量不能为负，小窝总数必须至少为 1。");
+      }
+      if (maleCount + femaleCount !== nestCount) {
+        throw new Error("当前数量不满足 雄性 + 雌性 = 小窝总数。");
+      }
+      if (nestCount > 20) {
+        throw new Error("为了保证网页计算速度，当前版本建议小窝总数不超过 20。");
+      }
+      return { maleCount, femaleCount, nestCount };
+    }
+
+    function runSolver() {
+      try {
+        const { maleCount, femaleCount, nestCount } = validateInputs();
+        statusEl.className = "notice";
+        statusEl.textContent = "正在计算最优摆放，请稍候。";
+
+        const result = solvePlan(nestCount, maleCount, femaleCount);
+        if (!result) {
+          throw new Error("没有找到可行解。");
+        }
+
+        statusEl.className = "notice";
+        statusEl.textContent = `已完成：${maleCount} 雄 / ${femaleCount} 雌 / ${nestCount} 窝，共得到 ${result.compatiblePairs.length} 条可孵化配对，覆盖 ${result.uniqueBreedingFemales} 种母本异色产出。`;
+        renderStats(result);
+        renderBoard(result);
+        renderTable(result);
+        renderPairs(result);
+      } catch (error) {
+        statusEl.className = "error";
+        statusEl.textContent = error.message;
+        statsEl.innerHTML = "";
+        boardEl.innerHTML = "";
+        nestTableBody.innerHTML = "";
+        pairList.innerHTML = "";
+      }
+    }
+
+    [maleInput, femaleInput, nestInput, autoFieldInput].forEach(element => {
+      element.addEventListener("change", syncInputs);
+      element.addEventListener("input", () => {
+        if (element === autoFieldInput) {
+          return;
+        }
+        syncInputs();
+      });
+    });
+    solveButton.addEventListener("click", runSolver);
+
+    syncInputs();
+    runSolver();
+  </script>
+</body>
+</html>
